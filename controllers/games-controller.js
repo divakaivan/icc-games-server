@@ -40,7 +40,8 @@ const getGamesByTeam = async (req, res, next) => {
 
     let games;
     try {
-        games = await gamesList.filter(game => game.blue === team || game.red === team)
+        games = await Game.find({$or: [{red: team}, {blue: team}]});
+        // games = await gamesList.filter(game => game.blue === team || game.red === team)
     } catch (err) {
         const error = new HttpError("Fetching games failed. Try again,", 500);
         return next(error);
@@ -50,7 +51,7 @@ const getGamesByTeam = async (req, res, next) => {
         return next(new HttpError(`Could not find games where ${team} has played. Maybe add one?`, 404))
     }
 
-    res.json({games: games});
+    res.status(200).json({games: games.map(game=>game.toObject({getters: true}))});
 };
 
 const addGame = async (req, res, next) => {
