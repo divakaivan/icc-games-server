@@ -49,7 +49,20 @@ const addGame = async (req, res, next) => {
         return next(new HttpError("Invalid inputs given, please check your data.", 422));
     }
 
-    const {red, blue, duration, videoLink} = req.body;
+    const {red, blue, videoLink} = req.body;
+    let {duration} = req.body;
+
+    let game;
+    try {
+        game = gamesList.find(game => game.red === red && game.blue === blue && game.duration === Number(duration) && game.videoLink === videoLink);
+    } catch (err) {
+        const error = new HttpError("Something went wrong", 500);
+        return next(error);
+    }
+
+    if (game) {
+        return next(new HttpError(`There is already a game with blue: ${blue} vs red:${red}. Duration ${duration} mins and a video: ${videoLink}`))
+    }
 
     const newGame = {
         id: uuid(),
