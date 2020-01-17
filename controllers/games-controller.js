@@ -1,3 +1,5 @@
+const {validationResult} = require("express-validator");
+
 const HttpError = require("../http-errors");
 const uuid = require("uuid/v4");
 
@@ -41,6 +43,12 @@ const getGamesByTeam = async (req, res, next) => {
 };
 
 const addGame = async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError("Invalid inputs given, please check your data.", 422));
+    }
+
     const {red, blue, duration, videoLink} = req.body;
 
     const newGame = {
@@ -58,6 +66,12 @@ const addGame = async (req, res, next) => {
 
 
 const updateGame = async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError("Invalid inputs given, please check your data.", 422));
+    }
+
     const { blue, red, duration, videoLink } = req.body;
     const gameId = req.params.gameId;
 
