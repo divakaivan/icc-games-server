@@ -3,6 +3,8 @@ const {validationResult} = require("express-validator");
 const HttpError = require("../http-errors");
 const uuid = require("uuid/v4");
 
+const Game = require("../models/game");
+
 let gamesList = [
     {
         id: uuid(),
@@ -21,7 +23,16 @@ let gamesList = [
 ];
 
 const getGames = async (req, res,next) => {
-    res.json({games: gamesList});
+    let games;
+    try {
+        games = await Game.find({});
+    } catch (err) {
+        const error = new HttpError("Fetching games failed.", 500);
+        return next(error);
+    }
+
+    res.status(200).json({games: games.map(game=>game.toObject({getters: true}))});
+    // res.json({games: gamesList});
 };
 
 const getGamesByTeam = async (req, res, next) => {
@@ -51,29 +62,33 @@ const addGame = async (req, res, next) => {
 
     const {red, blue, videoLink} = req.body;
     let {duration} = req.body;
+    duration = Number(duration);
 
-    let game;
+    let existingGame;
     try {
-        game = gamesList.find(game => game.red === red && game.blue === blue && game.duration === Number(duration) && game.videoLink === videoLink);
+        existingGame = await Game.find({red, blue, videoLink, duration}); // this method finds one document matching the criteria given in the method
     } catch (err) {
-        const error = new HttpError("Something went wrong", 500);
+        const error = new HttpError("Adding a game failed. Try again", 500);
         return next(error);
     }
 
-    if (game) {
-        return next(new HttpError(`There is already a game with blue: ${blue} vs red:${red}. Duration ${duration} mins and a video: ${videoLink}`))
+    if (existingGame) {
+        const error = new HttpError("Game with this info exists already.", 422);
+        return next(error);
     }
 
-    const newGame = {
-        id: uuid(),
+    const newGame = new Game({
         red,
         blue,
-        duration,
-        videoLink
-    };
-
-    gamesList.push(newGame);
-
+        videoLink,
+        duration
+    });
+    try {
+        await newGame.save(); // this saves a newGame to the db and creates the unique id
+    } catch (err) {
+        const error = new HttpError("Adding game failed.", 500);
+        return next(error);
+    }
     res.json({message: "Added a new game", game: newGame})
 };
 

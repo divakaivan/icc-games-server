@@ -1,5 +1,10 @@
 const express = require("express");
+const mongoose = require("mongoose");
+
+
+const url = `mongodb+srv://divakaivan:${process.env.DB_PASS}@cluster0-cniio.mongodb.net/test?retryWrites=true&w=majority`;
 const bodyParser = require("body-parser");
+
 const gamesRouter = require("./routes/games-routes");
 
 const HttpError = require("http-errors");
@@ -27,6 +32,12 @@ app.use((error, req, res, next) => { // error handling middleware
 });
 
 
-
-
-app.listen("5000");
+mongoose
+    .connect(url, {useNewUrlParser: true})
+    .then(() => {
+        app.listen(5000);
+        console.log("Connected to database SUCCESSFUL")
+    })
+    .catch(err => {
+        console.log(err);
+    });
