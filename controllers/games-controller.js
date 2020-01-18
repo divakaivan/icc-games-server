@@ -90,7 +90,7 @@ const addGame = async (req, res, next) => {
         const error = new HttpError("Adding game failed.", 500);
         return next(error);
     }
-    res.json({message: "Added a new game", game: newGame})
+    res.status(201).json({message: "Added a new game", game: newGame})
 };
 
 
@@ -106,10 +106,9 @@ const updateGame = async (req, res, next) => {
 
     let game;
     try {
-        game = await gamesList.find(game => game.id === gameId);
-        console.log(game)
+        game = await Game.findById(gameId);
     } catch (err) {
-        const error = new HttpError("Could not find place with given game id", 404);
+        const error = new HttpError("Could not find game with given game id", 404);
         return next(error);
     }
 
@@ -118,9 +117,14 @@ const updateGame = async (req, res, next) => {
     game.duration = duration;
     game.videoLink = videoLink;
 
+    try {
+        await game.save();
+    } catch (err) {
+        const error = new HttpError("Something went wrong. Could not update game info", 500);
+        return next(error);
+    }
 
-
-    res.status(201).json({message: "Game info updated!", game: game})
+    res.status(200).json({game: game.toObject({getters: true})});
 };
 
 const getGameById = async (req, res, next) => {
