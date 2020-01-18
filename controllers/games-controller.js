@@ -1,26 +1,8 @@
 const {validationResult} = require("express-validator");
 
 const HttpError = require("../http-errors");
-const uuid = require("uuid/v4");
 
 const Game = require("../models/game");
-
-let gamesList = [
-    {
-        id: uuid(),
-        red: "FNC",
-        blue: "G2",
-        duration: 32,
-        videoLink: "https://www.youtube.com/watch?v=6XWlPKsuBps"
-    },
-    {
-        id: uuid(),
-        red: "MSF",
-        blue: "FNC",
-        duration: 25,
-        videoLink: "https://www.youtube.com/watch?v=6XWlPKsuBps"
-    }
-];
 
 const getGames = async (req, res,next) => {
     let games;
@@ -33,6 +15,25 @@ const getGames = async (req, res,next) => {
 
     res.status(200).json({games: games.map(game=>game.toObject({getters: true}))});
     // res.json({games: gamesList});
+};
+
+const getGameById = async (req, res, next) => {
+    const gameId = req.params.gameId;
+
+    let game;
+    try {
+        game = await Game.findById(gameId);
+    } catch (err) {
+        const error = new HttpError("Could not find a game for given id", 404);
+        return next(error);
+    }
+
+    if (!game) {
+        const error = new HttpError("Could not find a game for given id", 404);
+        return next(error);
+    }
+
+    res.status(200).json({game: game.toObject({getters: true})});
 };
 
 const getGamesByTeam = async (req, res, next) => {
@@ -125,26 +126,6 @@ const updateGame = async (req, res, next) => {
 
     res.status(200).json({game: game.toObject({getters: true})});
 };
-
-const getGameById = async (req, res, next) => {
-    const gameId = req.params.gameId;
-
-    let game;
-    try {
-        game = await Game.findById(gameId);
-    } catch (err) {
-        const error = new HttpError("Could not find a game for given id", 404);
-        return next(error);
-    }
-
-    if (!game) {
-        const error = new HttpError("Could not find a game for given id", 404);
-        return next(error);
-    }
-
-    res.status(200).json({game: game.toObject({getters: true})});
-};
-
 
 const deleteGameById = async (req, res, next) => {
     const gameId = req.params.gameId;
