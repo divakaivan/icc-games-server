@@ -11,7 +11,7 @@ router.get("/", gamesController.getGames);
 
 router.get("/:team/all", gamesController.getGamesByTeam);
 
-router.get("/:team/:gameId", gamesController.getGameById);
+router.get("/:gameId", gamesController.getGameById);
 
 router.post("/",
     [

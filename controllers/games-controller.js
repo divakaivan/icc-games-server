@@ -67,7 +67,7 @@ const addGame = async (req, res, next) => {
 
     let existingGame;
     try {
-        existingGame = await Game.find({red, blue, videoLink, duration}); // this method finds one document matching the criteria given in the method
+        existingGame = await Game.findOne({$and:[{red}, {blue}, {duration}, {videoLink}]}); // this method finds one document matching the criteria given in the method
     } catch (err) {
         const error = new HttpError("Adding a game failed. Try again", 500);
         return next(error);
@@ -125,13 +125,12 @@ const updateGame = async (req, res, next) => {
 
 const getGameById = async (req, res, next) => {
     const gameId = req.params.gameId;
-    const team = req.params.team;
 
     let game;
     try {
-        game = await gamesList.find(game => game.id === gameId && (game.red === team || game.blue === team) );
+        game = await Game.findById(gameId);
     } catch (err) {
-        const error = new HttpError("Something went wrong", 500);
+        const error = new HttpError("Could not find a game for given id", 404);
         return next(error);
     }
 
@@ -140,7 +139,7 @@ const getGameById = async (req, res, next) => {
         return next(error);
     }
 
-    res.json({game: game});
+    res.status(200).json({game: game.toObject({getters: true})});
 };
 
 
