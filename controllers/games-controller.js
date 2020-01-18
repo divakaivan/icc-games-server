@@ -93,7 +93,6 @@ const addGame = async (req, res, next) => {
     res.status(201).json({message: "Added a new game", game: newGame})
 };
 
-
 const updateGame = async (req, res, next) => {
     const errors = validationResult(req);
 
@@ -152,7 +151,7 @@ const deleteGameById = async (req, res, next) => {
 
     let game;
     try {
-        game = gamesList.find(game => game.id === gameId);
+        game = await Game.findById(gameId);
     } catch (err) {
         const error = new HttpError("Something went wrong. Could not delete game", 500);
         return next(error);
@@ -162,10 +161,14 @@ const deleteGameById = async (req, res, next) => {
         const error = new HttpError("Could not find a game for the given id", 404);
         return next(error);
     }
+    try {
+        await Game.deleteOne(game);
+    } catch (err) {
+        const error = new HttpError("Could not delete game. Try again.", 500);
+        return next(error);
+    }
 
-    gamesList = gamesList.filter(game => game.id !== gameId);
-
-    res.json({message: "Game deleted.", games: gamesList})
+    res.status(200).json({message: "Game deleted."})
 };
 
 
