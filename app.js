@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-
+const cors = require('cors');
 
 const url = `mongodb+srv://divakaivan:${process.env.DB_PASS}@cluster0-cniio.mongodb.net/test?retryWrites=true&w=majority`;
 const bodyParser = require("body-parser");
@@ -12,7 +12,7 @@ const HttpError = require("http-errors");
 const app = express();
 
 app.use(bodyParser.json());
-
+app.use(cors());
 
 app.use("/api/games", gamesRouter);
 

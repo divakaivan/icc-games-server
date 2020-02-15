@@ -62,13 +62,11 @@ const addGame = async (req, res, next) => {
         return next(new HttpError("Invalid inputs given, please check your data.", 422));
     }
 
-    const {red, blue, videoLink} = req.body;
-    let {duration} = req.body;
-    duration = Number(duration);
+    const {red, blue, champions, videoLink} = req.body;
 
     let existingGame;
     try {
-        existingGame = await Game.findOne({$and:[{red}, {blue}, {duration}, {videoLink}]}); // this method finds one document matching the criteria given in the method
+        existingGame = await Game.findOne({$and:[{red}, {blue}, {champions}, {videoLink}]}); // this method finds one document matching the criteria given in the method
     } catch (err) {
         const error = new HttpError("Adding a game failed. Try again", 500);
         return next(error);
@@ -83,7 +81,7 @@ const addGame = async (req, res, next) => {
         red,
         blue,
         videoLink,
-        duration
+        champions
     });
     try {
         await newGame.save(); // this saves a newGame to the db and creates the unique id
@@ -101,7 +99,7 @@ const updateGame = async (req, res, next) => {
         return next(new HttpError("Invalid inputs given, please check your data.", 422));
     }
 
-    const { blue, red, duration, videoLink } = req.body;
+    const { blue, red, champions, videoLink } = req.body;
     const gameId = req.params.gameId;
 
     let game;
@@ -114,7 +112,7 @@ const updateGame = async (req, res, next) => {
 
     game.blue = blue;
     game.red = red;
-    game.duration = duration;
+    game.champions = champions;
     game.videoLink = videoLink;
 
     try {

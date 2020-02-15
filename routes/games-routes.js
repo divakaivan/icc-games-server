@@ -21,8 +21,8 @@ router.post("/",
         check("blue")
             .not()
             .isEmpty(),
-        check("duration")
-            .isNumeric(),
+        check("champions")
+            .isArray(),
         check("videoLink")
             .isURL()
     ],
@@ -36,8 +36,8 @@ router.patch("/:gameId",
         check("blue")
             .not()
             .isEmpty(),
-        check("duration")
-            .isNumeric(),
+        check("champions")
+            .isArray(),
         check("videoLink")
             .isURL()
     ],
